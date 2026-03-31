@@ -3,43 +3,39 @@ pipeline {
 
     tools {
         maven 'Maven'
-        jdk 'JDK17'
+        jdk 'JDK25'
     }
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/Shrutichaudhari-bot/DevOps-Maven-Project.git'
-            }
-        }
-
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                script {
+                    if (isUnix()) {
+                        sh 'mvn clean compile'
+                    } else {
+                        bat 'mvn clean compile'
+                    }
+                }
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                script {
+                    if (isUnix()) {
+                        sh 'mvn test'
+                    } else {
+                        bat 'mvn test'
+                    }
+                }
             }
         }
-
-        stage('Package') {
-            steps {
-                sh 'mvn package'
-            }
-        }
-
     }
 
     post {
-        success {
-            echo 'Build Successful!'
-        }
-        failure {
-            echo 'Build Failed!'
+        always {
+            junit '**/target/surefire-reports/*.xml'
         }
     }
 }
